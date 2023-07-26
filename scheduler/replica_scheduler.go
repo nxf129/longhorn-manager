@@ -164,6 +164,16 @@ func (rcs *ReplicaScheduler) getDiskCandidates(nodeInfo map[string]*longhorn.Nod
 		zoneSoftAntiAffinity = volume.Spec.ReplicaZoneSoftAntiAffinity == longhorn.ReplicaZoneSoftAntiAffinityEnabled
 	}
 
+	diskSoftAntiAffinity, err := rcs.ds.GetSettingAsBool(types.SettingNameReplicaDiskSoftAntiAffinity)
+	if err != nil {
+		logrus.Errorf("Error getting replica disk soft anti-affinity setting: %v", err)
+	}
+	if volume.Spec.ReplicaDiskSoftAntiAffinity != longhorn.ReplicaDiskSoftAntiAffinityDefault &&
+		volume.Spec.ReplicaDiskSoftAntiAffinity != "" {
+		diskSoftAntiAffinity = volume.Spec.ReplicaDiskSoftAntiAffinity == longhorn.ReplicaDiskSoftAntiAffinityEnabled
+	}
+	_ = diskSoftAntiAffinity // TODO: Use this value during scheduling.
+
 	getDiskCandidatesFromNodes := func(nodes map[string]*longhorn.Node) (diskCandidates map[string]*Disk, multiError util.MultiError) {
 		multiError = util.NewMultiError()
 		for _, node := range nodes {
@@ -224,7 +234,7 @@ func (rcs *ReplicaScheduler) getDiskCandidates(nodeInfo map[string]*longhorn.Nod
 	}
 
 	switch {
-	case !zoneSoftAntiAffinity && !nodeSoftAntiAffinity:
+	case !zoneSoftAntiAffinity && !nodeSoftAntiAffinity: // No change. We can't use two disks from the same node in this situation.
 		diskCandidates, errors := getDiskCandidatesFromNodes(unusedNodesInNewZones)
 		if len(diskCandidates) > 0 {
 			return diskCandidates, nil
@@ -235,7 +245,7 @@ func (rcs *ReplicaScheduler) getDiskCandidates(nodeInfo map[string]*longhorn.Nod
 			return diskCandidates, nil
 		}
 		multiError.Append(errors)
-	case zoneSoftAntiAffinity && !nodeSoftAntiAffinity:
+	case zoneSoftAntiAffinity && !nodeSoftAntiAffinity: // No change. We can't use two disks from the same node in this situation.
 		diskCandidates, errors := getDiskCandidatesFromNodes(unusedNodesInNewZones)
 		if len(diskCandidates) > 0 {
 			return diskCandidates, nil

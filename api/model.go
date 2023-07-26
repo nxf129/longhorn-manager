@@ -54,6 +54,7 @@ type Volume struct {
 	BackupCompressionMethod          longhorn.BackupCompressionMethod       `json:"backupCompressionMethod"`
 	ReplicaSoftAntiAffinity          longhorn.ReplicaSoftAntiAffinity       `json:"replicaSoftAntiAffinity"`
 	ReplicaZoneSoftAntiAffinity      longhorn.ReplicaZoneSoftAntiAffinity   `json:"replicaZoneSoftAntiAffinity"`
+	ReplicaDiskSoftAntiAffinity      longhorn.ReplicaDiskSoftAntiAffinity   `json:"replicaDiskSoftAntiAffinity"`
 	BackendStoreDriver               longhorn.BackendStoreDriverType        `json:"backendStoreDriver"`
 	OfflineReplicaRebuilding         longhorn.OfflineReplicaRebuilding      `json:"offlineReplicaRebuilding"`
 	OfflineReplicaRebuildingRequired bool                                   `json:"offlineReplicaRebuildingRequired"`
@@ -323,6 +324,10 @@ type UpdateReplicaZoneSoftAntiAffinityInput struct {
 	ReplicaZoneSoftAntiAffinity string `json:"replicaZoneSoftAntiAffinity"`
 }
 
+type UpdateReplicaDiskSoftAntiAffinityInput struct {
+	ReplicaDiskSoftAntiAffinity string `json:"replicaDiskSoftAntiAffinity"`
+}
+
 type PVCreateInput struct {
 	PVName string `json:"pvName"`
 	FSType string `json:"fsType"`
@@ -567,6 +572,7 @@ func NewSchema() *client.Schemas {
 	schemas.AddType("UpdateUnmapMarkSnapChainRemovedInput", UpdateUnmapMarkSnapChainRemovedInput{})
 	schemas.AddType("UpdateReplicaSoftAntiAffinityInput", UpdateReplicaSoftAntiAffinityInput{})
 	schemas.AddType("UpdateReplicaZoneSoftAntiAffinityInput", UpdateReplicaZoneSoftAntiAffinityInput{})
+	schemas.AddType("UpdateReplicaDiskSoftAntiAffinityInput", UpdateReplicaDiskSoftAntiAffinityInput{})
 	schemas.AddType("workloadStatus", longhorn.WorkloadStatus{})
 	schemas.AddType("cloneStatus", longhorn.VolumeCloneStatus{})
 	schemas.AddType("empty", Empty{})
@@ -927,6 +933,10 @@ func volumeSchema(volume *client.Schema) {
 			Input: "UpdateReplicaZoneSoftAntiAffinityInput",
 		},
 
+		"updateReplicaDiskSoftAntiAffinity": {
+			Input: "UpdateReplicaDiskSoftAntiAffinityInput",
+		},
+
 		"pvCreate": {
 			Input:  "PVCreateInput",
 			Output: "volume",
@@ -1054,6 +1064,12 @@ func volumeSchema(volume *client.Schema) {
 	replicaZoneSoftAntiAffinity.Create = true
 	replicaZoneSoftAntiAffinity.Default = longhorn.ReplicaZoneSoftAntiAffinityDefault
 	volume.ResourceFields["replicaZoneSoftAntiAffinity"] = replicaZoneSoftAntiAffinity
+
+	replicaDiskSoftAntiAffinity := volume.ResourceFields["replicaDiskSoftAntiAffinity"]
+	replicaDiskSoftAntiAffinity.Required = true
+	replicaDiskSoftAntiAffinity.Create = true
+	replicaDiskSoftAntiAffinity.Default = longhorn.ReplicaDiskSoftAntiAffinityDefault
+	volume.ResourceFields["replicaDiskSoftAntiAffinity"] = replicaDiskSoftAntiAffinity
 
 	backendStoreDriver := volume.ResourceFields["backendStoreDriver"]
 	backendStoreDriver.Required = true
@@ -1417,6 +1433,7 @@ func toVolumeResource(v *longhorn.Volume, ves []*longhorn.Engine, vrs []*longhor
 		UnmapMarkSnapChainRemoved:        v.Spec.UnmapMarkSnapChainRemoved,
 		ReplicaSoftAntiAffinity:          v.Spec.ReplicaSoftAntiAffinity,
 		ReplicaZoneSoftAntiAffinity:      v.Spec.ReplicaZoneSoftAntiAffinity,
+		ReplicaDiskSoftAntiAffinity:      v.Spec.ReplicaDiskSoftAntiAffinity,
 		BackendStoreDriver:               v.Spec.BackendStoreDriver,
 		OfflineReplicaRebuilding:         v.Spec.OfflineReplicaRebuilding,
 		OfflineReplicaRebuildingRequired: v.Status.OfflineReplicaRebuildingRequired,
@@ -1478,6 +1495,7 @@ func toVolumeResource(v *longhorn.Volume, ves []*longhorn.Engine, vrs []*longhor
 			actions["updateBackupCompressionMethod"] = struct{}{}
 			actions["updateReplicaSoftAntiAffinity"] = struct{}{}
 			actions["updateReplicaZoneSoftAntiAffinity"] = struct{}{}
+			actions["updateReplicaDiskSoftAntiAffinity"] = struct{}{}
 			actions["recurringJobAdd"] = struct{}{}
 			actions["recurringJobDelete"] = struct{}{}
 			actions["recurringJobList"] = struct{}{}
@@ -1506,6 +1524,7 @@ func toVolumeResource(v *longhorn.Volume, ves []*longhorn.Engine, vrs []*longhor
 			actions["updateBackupCompressionMethod"] = struct{}{}
 			actions["updateReplicaSoftAntiAffinity"] = struct{}{}
 			actions["updateReplicaZoneSoftAntiAffinity"] = struct{}{}
+			actions["updateReplicaDiskSoftAntiAffinity"] = struct{}{}
 			actions["pvCreate"] = struct{}{}
 			actions["pvcCreate"] = struct{}{}
 			actions["cancelExpansion"] = struct{}{}

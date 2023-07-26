@@ -76,6 +76,7 @@ func NewRouter(s *Server) *mux.Router {
 		"updateUnmapMarkSnapChainRemoved":   s.VolumeUpdateUnmapMarkSnapChainRemoved,
 		"updateReplicaSoftAntiAffinity":     s.VolumeUpdateReplicaSoftAntiAffinity,
 		"updateReplicaZoneSoftAntiAffinity": s.VolumeUpdateReplicaZoneSoftAntiAffinity,
+		"updateReplicaDiskSoftAntiAffinity": s.VolumeUpdateReplicaDiskSoftAntiAffinity,
 		"activate":                          s.VolumeActivate,
 		"expand":                            s.VolumeExpand,
 		"cancelExpansion":                   s.VolumeCancelExpansion,

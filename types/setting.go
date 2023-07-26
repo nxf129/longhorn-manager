@@ -107,6 +107,7 @@ const (
 	SettingNameV2DataEngine                                             = SettingName("v2-data-engine")
 	SettingNameV2DataEngineHugepageLimit                                = SettingName("v2-data-engine-hugepage-limit")
 	SettingNameOfflineReplicaRebuilding                                 = SettingName("offline-replica-rebuilding")
+	SettingNameReplicaDiskSoftAntiAffinity                              = SettingName("replica-disk-soft-anti-affinity")
 )
 
 var (
@@ -179,6 +180,7 @@ var (
 		SettingNameV2DataEngine,
 		SettingNameV2DataEngineHugepageLimit,
 		SettingNameOfflineReplicaRebuilding,
+		SettingNameReplicaDiskSoftAntiAffinity,
 	}
 )
 
@@ -277,6 +279,7 @@ var (
 		SettingNameV2DataEngine:                                             SettingDefinitionV2DataEngine,
 		SettingNameV2DataEngineHugepageLimit:                                SettingDefinitionV2DataEngineHugepageLimit,
 		SettingNameOfflineReplicaRebuilding:                                 SettingDefinitionOfflineReplicaRebuilding,
+		SettingNameReplicaDiskSoftAntiAffinity:                              SettingDefinitionReplicaDiskSoftAntiAffinity,
 	}
 
 	SettingDefinitionBackupTarget = SettingDefinition{
@@ -1102,6 +1105,16 @@ var (
 		Required:    true,
 		ReadOnly:    true,
 		Default:     "1024",
+	}
+
+	SettingDefinitionReplicaDiskSoftAntiAffinity = SettingDefinition{
+		DisplayName: "Replica Disk Level Soft Anti-Affinity",
+		Description: "Allow scheduling on disks with existing healthy replicas of the same volume",
+		Category:    SettingCategoryScheduling,
+		Type:        SettingTypeBool,
+		Required:    true,
+		ReadOnly:    false,
+		Default:     "true",
 	}
 )
 
